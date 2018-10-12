@@ -1,6 +1,7 @@
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+#from PyQt4.QtGui import *
+#from PyQt4.QtCore import *
 
+from PyQt4.QtGui import QAction
 from qgis.core import QgsVectorLayer, QGis
 
 from ngw_api.core.ngw_vector_layer import NGWVectorLayer

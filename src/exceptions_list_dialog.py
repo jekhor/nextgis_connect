@@ -1,5 +1,5 @@
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt4.QtGui import QDialog, QVBoxLayout, QWidget, QScrollArea, QLabel, QSizePolicy, QHBoxLayout, QFrame
+from PyQt4.QtCore import Qt
 
 from qgis.core import QgsMessageLog
 from plugin_settings import PluginSettings

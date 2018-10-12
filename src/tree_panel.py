@@ -28,9 +28,8 @@ import json
 import functools
 
 from PyQt4 import uic
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-from PyQt4.QtNetwork import *
+from PyQt4.QtGui import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QIcon, QSizePolicy, QToolButton, QHeaderView, QPalette, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar
+from PyQt4.QtCore import Qt
 
 from qgis.core import QgsMessageLog, QgsProject, QgsVectorLayer, QgsRasterLayer, QgsPluginLayer, QgsNetworkAccessManager
 from qgis.gui import QgsMessageBar
