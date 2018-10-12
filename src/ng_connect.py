@@ -20,22 +20,26 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import object
 import sys
 from os import path
 
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon
 
 from qgis.core import QgsMapLayer, QgsMessageLog
 
-from settings_dialog import SettingsDialog
-from plugin_settings import PluginSettings
-from tree_panel import TreePanel
+from .settings_dialog import SettingsDialog
+from .plugin_settings import PluginSettings
+from .tree_panel import TreePanel
 
-from ngw_api import qgis
+from .ngw_api import qgis
 
 
-class NGConnectPlugin:
+class NGConnectPlugin(object):
     """QGIS Plugin Implementation.
         
         Utils:
@@ -304,14 +308,14 @@ plugins['nextgis_connect'].enableDebug(False)
     def info():
         print("Plugin NextGIS Connect.")
 
-        import ngw_api
+        from . import ngw_api
         print("NGW API v. %s" % (ngw_api.__version__) )
 
         print("NGW API log %s" % ("ON" if ngw_api.utils.debug else "OFF") )
 
     @staticmethod
     def enableDebug(flag):
-        import ngw_api
+        from . import ngw_api
         ngw_api.utils.debug = flag
 
         print("NGW API log %s" % ("ON" if ngw_api.utils.debug else "OFF") )

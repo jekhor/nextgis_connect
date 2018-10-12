@@ -1,5 +1,5 @@
-from PyQt4.QtGui import QSizePolicy, QTreeView, QDialog, QVBoxLayout, QCheckBox, QAction
-from PyQt4.QtCore import pyqtSignal, Qt
+from qgis.PyQt.QtWidgets import QSizePolicy, QTreeView, QDialog, QVBoxLayout, QCheckBox, QAction
+from qgis.PyQt.QtCore import pyqtSignal, Qt
 
 
 class NGWResourcesTreeView(QTreeView):

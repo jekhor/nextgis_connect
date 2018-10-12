@@ -22,51 +22,54 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import absolute_import
+from builtins import str
 import os
 import sys
 import json
 import functools
 
-from PyQt4 import uic
-from PyQt4.QtGui import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QIcon, QSizePolicy, QToolButton, QHeaderView, QPalette, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar
-from PyQt4.QtCore import Qt
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QSizePolicy, QToolButton, QHeaderView, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar
+from qgis.PyQt.QtGui import QIcon, QPalette
+from qgis.PyQt.QtCore import Qt
 
 from qgis.core import QgsMessageLog, QgsProject, QgsVectorLayer, QgsRasterLayer, QgsPluginLayer, QgsNetworkAccessManager
 from qgis.gui import QgsMessageBar
 
-from ngw_api.core.ngw_error import NGWError
-from ngw_api.core.ngw_group_resource import NGWGroupResource
-from ngw_api.core.ngw_vector_layer import NGWVectorLayer
-from ngw_api.core.ngw_raster_layer import NGWRasterLayer
-from ngw_api.core.ngw_wms_connection import NGWWmsConnection
-from ngw_api.core.ngw_wms_layer import NGWWmsLayer
-from ngw_api.core.ngw_webmap import NGWWebMap
-from ngw_api.core.ngw_wfs_service import NGWWfsService
-from ngw_api.core.ngw_wms_service import NGWWmsService
-from ngw_api.core.ngw_mapserver_style import NGWMapServerStyle
-from ngw_api.core.ngw_qgis_vector_style import NGWQGISVectorStyle
-from ngw_api.core.ngw_raster_style import NGWRasterStyle
-from ngw_api.core.ngw_base_map import NGWBaseMap
+from .ngw_api.core.ngw_error import NGWError
+from .ngw_api.core.ngw_group_resource import NGWGroupResource
+from .ngw_api.core.ngw_vector_layer import NGWVectorLayer
+from .ngw_api.core.ngw_raster_layer import NGWRasterLayer
+from .ngw_api.core.ngw_wms_connection import NGWWmsConnection
+from .ngw_api.core.ngw_wms_layer import NGWWmsLayer
+from .ngw_api.core.ngw_webmap import NGWWebMap
+from .ngw_api.core.ngw_wfs_service import NGWWfsService
+from .ngw_api.core.ngw_wms_service import NGWWmsService
+from .ngw_api.core.ngw_mapserver_style import NGWMapServerStyle
+from .ngw_api.core.ngw_qgis_vector_style import NGWQGISVectorStyle
+from .ngw_api.core.ngw_raster_style import NGWRasterStyle
+from .ngw_api.core.ngw_base_map import NGWBaseMap
 
-from ngw_api.qt.qt_ngw_resource_item import QNGWResourceItem
-from ngw_api.qt.qt_ngw_resource_model_job_error import *
+from .ngw_api.qt.qt_ngw_resource_item import QNGWResourceItem
+from .ngw_api.qt.qt_ngw_resource_model_job_error import *
 
-from ngw_api.qgis.ngw_connection_edit_dialog import NGWConnectionEditDialog
-from ngw_api.qgis.ngw_plugin_settings import NgwPluginSettings
-from ngw_api.qgis.resource_to_map import *
+from .ngw_api.qgis.ngw_connection_edit_dialog import NGWConnectionEditDialog
+from .ngw_api.qgis.ngw_plugin_settings import NgwPluginSettings
+from .ngw_api.qgis.resource_to_map import *
 
-from ngw_api.qgis.ngw_resource_model_4qgis import QNGWResourcesModel4QGIS
+from .ngw_api.qgis.ngw_resource_model_4qgis import QNGWResourcesModel4QGIS
 
-from ngw_api.utils import setLogger
+from .ngw_api.utils import setLogger
 
-from settings_dialog import SettingsDialog
-from plugin_settings import PluginSettings
+from .settings_dialog import SettingsDialog
+from .plugin_settings import PluginSettings
 
-from dialog_choose_style import NGWLayerStyleChooserDialog
-from dialog_qgis_proj_import import DialogImportQGISProj
-from exceptions_list_dialog import ExceptionsListDialog
+from .dialog_choose_style import NGWLayerStyleChooserDialog
+from .dialog_qgis_proj_import import DialogImportQGISProj
+from .exceptions_list_dialog import ExceptionsListDialog
 
-from action_style_import_or_update import ActionStyleImportUpdate
+from .action_style_import_or_update import ActionStyleImportUpdate
 
 import utils
 
@@ -579,12 +582,12 @@ class TreeControl(QMainWindow, FORM_CLASS):
             return
 
         s = QSettings()
-        proxyEnabled = s.value("proxy/proxyEnabled", u"", type=unicode)
-        proxy_type = s.value("proxy/proxyType", u"", type=unicode)
-        proxy_host = s.value("proxy/proxyHost", u"", type=unicode)
-        proxy_port = s.value("proxy/proxyPort", u"", type=unicode)
-        proxy_user = s.value("proxy/proxyUser", u"", type=unicode)
-        proxy_password = s.value("proxy/proxyPassword", u"", type=unicode)
+        proxyEnabled = s.value("proxy/proxyEnabled", u"", type=str)
+        proxy_type = s.value("proxy/proxyType", u"", type=str)
+        proxy_host = s.value("proxy/proxyHost", u"", type=str)
+        proxy_port = s.value("proxy/proxyPort", u"", type=str)
+        proxy_user = s.value("proxy/proxyUser", u"", type=str)
+        proxy_password = s.value("proxy/proxyPassword", u"", type=str)
 
         if proxyEnabled == "true":
             if proxy_type == "DefaultProxy":
@@ -1005,7 +1008,7 @@ class TreeControl(QMainWindow, FORM_CLASS):
         ngw_qgis_style = selected_index.data(QNGWResourceItem.NGWResourceRole)
         url = ngw_qgis_style.download_qml_url()
 
-        filepath = QFileDialog.getSaveFileName(
+        filepath, __ = QFileDialog.getSaveFileName(
             self,
             self.tr("Save QML"),
             "%s.qml" % ngw_qgis_style.common.display_name,
@@ -1133,7 +1136,7 @@ class ProcessOverlay(Overlay):
 
     def write(self, jobs):
         text = ""
-        for job_name, job_status in jobs.items():
+        for job_name, job_status in list(jobs.items()):
             text += "<strong>%s</strong><br/>" % job_name
             if job_status != "":
                 text += "%s<br/>" % job_status

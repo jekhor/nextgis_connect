@@ -1,8 +1,9 @@
-from PyQt4.QtGui import QDialog, QVBoxLayout, QWidget, QScrollArea, QLabel, QSizePolicy, QHBoxLayout, QFrame
-from PyQt4.QtCore import Qt
+from __future__ import absolute_import
+from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QWidget, QScrollArea, QLabel, QSizePolicy, QHBoxLayout, QFrame
+from qgis.PyQt.QtCore import Qt
 
 from qgis.core import QgsMessageLog
-from plugin_settings import PluginSettings
+from .plugin_settings import PluginSettings
 def qgisLog(msg, level=QgsMessageLog.INFO):
     QgsMessageLog.logMessage(msg, PluginSettings._product, level)
 
