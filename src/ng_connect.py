@@ -61,7 +61,7 @@ plugins['nextgis_connect'].enableDebug(False)
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
-        self.plugin_dir = path.dirname(__file__).decode(sys.getfilesystemencoding())
+        self.plugin_dir = path.dirname(__file__)
 
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
@@ -245,24 +245,21 @@ plugins['nextgis_connect'].enableDebug(False)
         #     True
         # )
 
-        self.iface.legendInterface().addLegendLayerAction(
+        self.iface.addCustomActionForLayerType(
             self.dockWidget.inner_control.actionImportQGISResource,
             self.tr(u"NextGIS Connect"),
-            u"",
             QgsMapLayer.RasterLayer,
             True
         )
-        self.iface.legendInterface().addLegendLayerAction(
+        self.iface.addCustomActionForLayerType(
             self.dockWidget.inner_control.actionImportQGISResource,
             self.tr(u"NextGIS Connect"),
-            u"",
             QgsMapLayer.VectorLayer,
             True
         )
-        self.iface.legendInterface().addLegendLayerAction(
+        self.iface.addCustomActionForLayerType(
             self.dockWidget.inner_control.actionImportUpdateStyle,
             self.tr(u"NextGIS Connect"),
-            u"",
             QgsMapLayer.VectorLayer,
             True
         )
@@ -277,13 +274,13 @@ plugins['nextgis_connect'].enableDebug(False)
         # )
         # Hack - qgis delete only one action, we have two same actions
 
-        self.iface.legendInterface().removeLegendLayerAction(
+        self.iface.removeCustomActionForLayerType(
             self.dockWidget.inner_control.actionImportQGISResource
         )
-        self.iface.legendInterface().removeLegendLayerAction(
+        self.iface.removeCustomActionForLayerType(
             self.dockWidget.inner_control.actionImportQGISResource
         )
-        self.iface.legendInterface().removeLegendLayerAction(
+        self.iface.removeCustomActionForLayerType(
             self.dockWidget.inner_control.actionImportUpdateStyle
         )
 

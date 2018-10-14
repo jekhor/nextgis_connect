@@ -2,9 +2,9 @@ from __future__ import absolute_import
 from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QWidget, QScrollArea, QLabel, QSizePolicy, QHBoxLayout, QFrame
 from qgis.PyQt.QtCore import Qt
 
-from qgis.core import QgsMessageLog
+from qgis.core import QgsMessageLog, Qgis
 from .plugin_settings import PluginSettings
-def qgisLog(msg, level=QgsMessageLog.INFO):
+def qgisLog(msg, level=Qgis.Info):
     QgsMessageLog.logMessage(msg, PluginSettings._product, level)
 
 

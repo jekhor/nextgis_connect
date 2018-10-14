@@ -28,13 +28,15 @@ import os
 import sys
 import json
 import functools
+import traceback
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtWidgets import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QSizePolicy, QToolButton, QHeaderView, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar
-from qgis.PyQt.QtGui import QIcon, QPalette
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QSizePolicy, QToolButton, QHeaderView, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar, QPushButton, QFileDialog, QInputDialog, QMessageBox, QListWidget, QListWidgetItem, QDialog
+from qgis.PyQt.QtGui import QIcon, QPalette, QPainter, QBrush, QPen, QColor
+from qgis.PyQt.QtCore import Qt, QFile, QModelIndex
+from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
-from qgis.core import QgsMessageLog, QgsProject, QgsVectorLayer, QgsRasterLayer, QgsPluginLayer, QgsNetworkAccessManager
+from qgis.core import Qgis, QgsMessageLog, QgsProject, QgsVectorLayer, QgsRasterLayer, QgsPluginLayer, QgsNetworkAccessManager
 from qgis.gui import QgsMessageBar
 
 from .ngw_api.core.ngw_error import NGWError
@@ -71,9 +73,7 @@ from .exceptions_list_dialog import ExceptionsListDialog
 
 from .action_style_import_or_update import ActionStyleImportUpdate
 
-import utils
-
-this_dir = os.path.dirname(__file__).decode(sys.getfilesystemencoding())
+this_dir = os.path.dirname(__file__)
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     this_dir, 'tree_panel_base.ui'))
@@ -81,13 +81,70 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 ICONS_PATH = os.path.join(this_dir, 'icons/')
 
 
-def qgisLog(msg, level=QgsMessageLog.INFO):
+def qgisLog(msg, level=Qgis.Info):
     QgsMessageLog.logMessage(msg, PluginSettings._product, level)
 
-def ngwApiLog(msg, level=QgsMessageLog.INFO):
+def ngwApiLog(msg, level=Qgis.Info):
     QgsMessageLog.logMessage(msg, "NGW API", level)
 
 setLogger(ngwApiLog)
+
+class ChooserDialog(QDialog):
+    """docstring for ChooserDialog"""
+    def __init__(self, options):
+        super(ChooserDialog, self).__init__()
+        self.options = options
+
+        self.setLayout(QVBoxLayout())
+
+        self.list = QListWidget()
+        self.list.setSelectionMode(QListWidget.MultiSelection)
+        self.list.setSelectionBehavior(QListWidget.SelectItems)
+        self.layout().addWidget(self.list)
+
+        for option in options:
+            item = QListWidgetItem(option)
+            self.list.addItem(item)
+
+        self.list.setCurrentRow(0)
+
+        self.btn_box = QDialogButtonBox(QDialogButtonBox.Ok, Qt.Horizontal, self)
+        self.btn_box.button(QDialogButtonBox.Ok).clicked.connect(self.accept)
+        self.layout().addWidget(
+            self.btn_box
+        )
+
+        self.seleced_options = []
+
+    def accept(self):
+        self.selected_options = [item.text() for item in self.list.selectedItems()]
+        super(ChooserDialog, self).accept()
+
+
+def add_wms_layer(name, url, layer_keys, ask_choose_layers=False):
+    url = "url=%s" % url
+
+    if ask_choose_layers:
+        layersChooser = ChooserDialog(layer_keys)
+        result = layersChooser.exec_()
+        if result == ChooserDialog.Accepted:
+            layer_keys = layersChooser.selected_options
+        else:
+            return
+
+    for layer_key in layer_keys:
+        url += "&layers=%s&styles=" % layer_key
+
+    url += "&format=image/png&crs=EPSG:3857"
+
+    rlayer = QgsRasterLayer(url, name, 'wms')
+
+    if not rlayer.isValid():
+        show_error_message("Invalid wms url \"%s\"" % url)
+        return
+
+    QgsProject.instance().addMapLayer(rlayer)
+
 
 
 class TreePanel(QDockWidget):
@@ -146,14 +203,12 @@ class TreeControl(QMainWindow, FORM_CLASS):
         # Import to NGW -------------------------------------------------------
         self.actionImportQGISResource = QAction(
             self.tr("Import selected layer(s)"),
-            self.iface.legendInterface()
         )
         self.actionImportQGISResource.triggered.connect(self.import_layers)
         self.actionImportQGISResource.setEnabled(False)
 
         self.actionUpdateNGWVectorLayer = QAction(
             self.tr("Overwrite selected layer"),
-            self.iface.legendInterface()
         )
         self.actionUpdateNGWVectorLayer.triggered.connect(self.overwrite_ngw_layer)
         self.actionUpdateNGWVectorLayer.setEnabled(False)
@@ -163,7 +218,6 @@ class TreeControl(QMainWindow, FORM_CLASS):
 
         self.actionImportQGISProject = QAction(
             self.tr("Import current project"),
-            self.iface.legendInterface()
         )
         self.actionImportQGISProject.triggered.connect(self.import_qgis_project)
 
@@ -362,10 +416,10 @@ class TreeControl(QMainWindow, FORM_CLASS):
         self.iface.currentLayerChanged.connect(
             self.qgisResourcesSelectionChanged
         )
-        QgsMapLayerRegistry.instance().layersAdded.connect(
+        QgsProject.instance().layersAdded.connect(
             self.qgisResourcesSelectionChanged
         )
-        QgsMapLayerRegistry.instance().layersRemoved.connect(
+        QgsProject.instance().layersRemoved.connect(
             self.qgisResourcesSelectionChanged
         )
 
@@ -385,10 +439,10 @@ class TreeControl(QMainWindow, FORM_CLASS):
         self.iface.currentLayerChanged.disconnect(
             self.qgisResourcesSelectionChanged
         )
-        QgsMapLayerRegistry.instance().layersAdded.disconnect(
+        QgsProject.instance().layersAdded.disconnect(
             self.qgisResourcesSelectionChanged
         )
-        QgsMapLayerRegistry.instance().layersRemoved.disconnect(
+        QgsProject.instance().layersRemoved.disconnect(
             self.qgisResourcesSelectionChanged
         )
 
@@ -426,7 +480,7 @@ class TreeControl(QMainWindow, FORM_CLASS):
             self.actionImportUpdateStyle.setEnabled(current_qgis_layer, ngw_resource)
 
         self.actionImportQGISProject.setEnabled(
-            QgsMapLayerRegistry.instance().count() != 0
+            QgsProject.instance().count() != 0
         )
 
         self.toolbuttonImport.setEnabled(
@@ -457,10 +511,10 @@ class TreeControl(QMainWindow, FORM_CLASS):
         self.checkImportActionsAvailability()
 
     def __model_warning_process(self, job, exception):
-        self.__model_exception_process(job, exception, QgsMessageBar.WARNING)
+        self.__model_exception_process(job, exception, Qgis.Warning)
 
     def __model_error_process(self, job, exception):
-        self.__model_exception_process(job, exception, QgsMessageBar.CRITICAL)
+        self.__model_exception_process(job, exception, Qgis.Critical)
 
     def __model_exception_process(self, job, exception, level, trace=None):
         msg, msg_ext, icon = self.__get_model_exception_description(job, exception)
@@ -517,11 +571,12 @@ class TreeControl(QMainWindow, FORM_CLASS):
 
         elif exception.__class__ == JobInternalError:
             msg = self.tr("Internal plugin error occurred!")
-            msg_ext = "".join(exception.trace)
+            msg_ext = str(exception) + "\n"
+            msg_ext += "".join(exception.trace)
 
         return msg, msg_ext, icon
     
-    def __msg_in_qgis_mes_bar(self, message, need_show_log, level=QgsMessageBar.INFO, duration=0):
+    def __msg_in_qgis_mes_bar(self, message, need_show_log, level=Qgis.Info, duration=0):
         if need_show_log:
             message += " " + self.tr("See logs for details.") 
         widget = self.iface.messageBar().createMessage(
@@ -746,34 +801,35 @@ class TreeControl(QMainWindow, FORM_CLASS):
                 elif isinstance(ngw_resource, NGWWfsService):
                     add_resource_as_wfs_layers(ngw_resource)
                 elif isinstance(ngw_resource, NGWWmsService):
-                    utils.add_wms_layer(
+                    add_wms_layer(
                         ngw_resource.common.display_name,
                         ngw_resource.get_url(),
                         ngw_resource.get_layer_keys(),
                         len(ngw_resource.get_layer_keys()) > 1
                     )
                 elif isinstance(ngw_resource, NGWWmsConnection):
-                    utils.add_wms_layer(
+                    add_wms_layer(
                         ngw_resource.common.display_name,
                         ngw_resource.get_connection_url(),
                         ngw_resource.layers(),
                         len(ngw_resource.layers()) > 1
                     )
                 elif isinstance(ngw_resource, NGWWmsLayer):
-                    utils.add_wms_layer(
+                    add_wms_layer(
                         ngw_resource.common.display_name,
                         ngw_resource.ngw_wms_connection_url,
                         ngw_resource.ngw_wms_layers,
                     )
 
             except Exception as ex:
-                error_mes = ex.message or ''
+                error_mes = str(ex) or ''
                 self.iface.messageBar().pushMessage(
                     self.tr('Error'),
                     error_mes,
-                    level=QgsMessageBar.CRITICAL
+                    level=Qgis.Critical
                 )
-                qgisLog(error_mes, level=QgsMessageLog.CRITICAL)
+                qgisLog(error_mes, level=Qgis.Critical)
+                qgisLog(traceback.format_exc(), level=Qgis.Critical)
 
     def create_group(self):
         new_group_name, res = QInputDialog.getText(
@@ -841,7 +897,7 @@ class TreeControl(QMainWindow, FORM_CLASS):
 
     def import_layers(self):
         index = self.trvResources.selectionModel().currentIndex()
-        qgs_map_layers = self.iface.legendInterface().selectedLayers()
+        qgs_map_layers = self.iface.layerTreeView().selectedLayers()
         
         self.import_layer_response = self._resource_model.createNGWLayers(qgs_map_layers, index)
         self.import_layer_response.done.connect(
@@ -1031,7 +1087,7 @@ class TreeControl(QMainWindow, FORM_CLASS):
             file.close()
             self.__msg_in_qgis_mes_bar(self.tr("QML file downloaded"), False, duration=2)
         else:
-            self.__msg_in_qgis_mes_bar(self.tr("QML file could not be downloaded"), True, QgsMessageBar.CRITICAL)
+            self.__msg_in_qgis_mes_bar(self.tr("QML file could not be downloaded"), True, Qgis.Critical)
 
         reply.deleteLater()
 
@@ -1155,7 +1211,7 @@ class NGWResourcesTreeView(QTreeView):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.header().setStretchLastSection(False)
-        self.header().setResizeMode(QHeaderView.ResizeToContents)
+        self.header().setSectionResizeMode(QHeaderView.ResizeToContents)
 
         # no ngw connectiond message
         self.no_ngw_connections_overlay = MessageOverlay(

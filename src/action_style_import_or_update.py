@@ -3,7 +3,7 @@ from __future__ import absolute_import
 #from PyQt4.QtCore import *
 
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsVectorLayer, QGis
+from qgis.core import QgsVectorLayer, Qgis, QgsWkbTypes
 
 from .ngw_api.core.ngw_vector_layer import NGWVectorLayer
 
@@ -24,16 +24,16 @@ class ActionStyleImportUpdate(QAction):
             return
 
 
-        qgis_vector_layer_geom = qgis_vector_layer.geometryType() 
+        qgis_vector_layer_geom = qgis_vector_layer.geometryType()
         ngw_vector_layer_geom = ngw_vector_layer.geom_type()
 
-        if qgis_vector_layer_geom in [QGis.Point ] and ngw_vector_layer_geom in [NGWVectorLayer.POINT, NGWVectorLayer.MULTIPOINT, ]:
+        if qgis_vector_layer_geom in [QgsWkbTypes.PointGeometry ] and ngw_vector_layer_geom in [NGWVectorLayer.POINT, NGWVectorLayer.MULTIPOINT, ]:
             super(ActionStyleImportUpdate, self).setEnabled(True)
             return
-        elif qgis_vector_layer_geom in [QGis.Line, ] and ngw_vector_layer_geom in [NGWVectorLayer.LINESTRING, NGWVectorLayer.MULTILINESTRING, ]:
+        elif qgis_vector_layer_geom in [QgsWkbTypes.LineGeometry, ] and ngw_vector_layer_geom in [NGWVectorLayer.LINESTRING, NGWVectorLayer.MULTILINESTRING, ]:
             super(ActionStyleImportUpdate, self).setEnabled(True)
             return
-        elif qgis_vector_layer_geom in [QGis.Polygon, ] and ngw_vector_layer_geom in [NGWVectorLayer.POLYGON, NGWVectorLayer.MULTIPOLYGON, ]:
+        elif qgis_vector_layer_geom in [QgsWkbTypes.PolygonGeometry, ] and ngw_vector_layer_geom in [NGWVectorLayer.POLYGON, NGWVectorLayer.MULTIPOLYGON, ]:
             super(ActionStyleImportUpdate, self).setEnabled(True)
             return
         

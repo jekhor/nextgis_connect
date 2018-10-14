@@ -1,4 +1,4 @@
-from qgis.PyQt.QtWidgets import QSizePolicy, QTreeView, QDialog, QVBoxLayout, QCheckBox, QAction
+from qgis.PyQt.QtWidgets import QSizePolicy, QTreeView, QDialog, QVBoxLayout, QCheckBox, QAction, QLabel, QHeaderView, QDialogButtonBox
 from qgis.PyQt.QtCore import pyqtSignal, Qt
 
 
@@ -12,7 +12,7 @@ class NGWResourcesTreeView(QTreeView):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.header().setStretchLastSection(False)
-        self.header().setResizeMode(QHeaderView.ResizeToContents)
+        self.header().setSectionResizeMode(QHeaderView.ResizeToContents)
 
 
 class NGWLayerStyleChooserDialog(QDialog):

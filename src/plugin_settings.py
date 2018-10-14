@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
-from PyQt4.Qt import Qt
+from qgis.PyQt.Qt import Qt
 from qgis.PyQt.QtCore import QSize, QPoint
 from .ngw_api.qgis.common_plugin_settings import PluginSettings as CommonPluginSettings
 
