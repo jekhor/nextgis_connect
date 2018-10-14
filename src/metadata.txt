@@ -1,13 +1,15 @@
 [general]
 name=NextGIS Connect
-qgisMinimumVersion=2.18
+qgisMinimumVersion=3.0
 description=Create, connect and use your own fully-functional Web GIS at nextgis.com.
 about=Welcome to brand new cloud Web GIS from NextGIS! With this plugin you can upload/download geodata to and from your Web GIS, manage layers and much more. We'd love to hear feedback about your experience at http://nextgis.com/contact.
-version=0.11.8
-author=NextGIS
-email=info@nextgis.com
+version=0.11.8.qgis3-1
+author=NextGIS + Yauhen Kharuzhy
+email=info@nextgis.com, jekhor@gmail.com
 
 changelog=
+	0.11.8.qgis3-1
+		* Port to Qgis 3
 	0.11.8
 		* Fix overwriting ngw vector layer with Z
 		* Fix icons for ngw vector layers with Z

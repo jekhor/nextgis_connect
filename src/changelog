@@ -1,4 +1,7 @@
 unreleased
+0.11.1.1
+    * Port to Qgis 3
+0.11.1
     * Fix bugs in upload file process
     * Fix requests dependency
     * Fix typos
