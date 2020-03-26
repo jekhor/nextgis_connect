@@ -31,9 +31,9 @@ import functools
 import traceback
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtWidgets import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QSizePolicy, QToolButton, QHeaderView, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar, QPushButton, QFileDialog, QInputDialog, QMessageBox, QListWidget, QListWidgetItem, QDialog
-from qgis.PyQt.QtGui import QIcon, QPalette, QPainter, QBrush, QPen, QColor
-from qgis.PyQt.QtCore import Qt, QFile, QModelIndex
+from qgis.PyQt.QtWidgets import QAction, QDockWidget, QMainWindow, QMenu, QToolBar, QWidget, QTreeView, QSizePolicy, QToolButton, QHeaderView, QHBoxLayout, QVBoxLayout, QLabel, QSpacerItem, QProgressBar, QPushButton, QFileDialog, QInputDialog, QMessageBox, QListWidget, QListWidgetItem, QDialog, QLineEdit
+from qgis.PyQt.QtGui import QIcon, QPalette, QPainter, QBrush, QPen, QColor, QDesktopServices
+from qgis.PyQt.QtCore import Qt, QFile, QModelIndex, QStringListModel
 from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 from qgis.core import Qgis, QgsMessageLog, QgsProject, QgsVectorLayer, QgsRasterLayer, QgsPluginLayer, QgsNetworkAccessManager
